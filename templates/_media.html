@@ -1,0 +1,129 @@
+{% import "_util.html" as util %}
+
+{% macro photo(obj) %}
+	<figure class="entry-photo">
+		{% if obj is object %}
+			<responsive-container {% if obj.width and obj.height %}class="has-pad" style="padding-bottom: {{ obj.height / obj.width * 100 }}%;{% else %}style="{% endif %}
+			background:
+			{% if obj.palette %}{% set dcolor = obj.palette | first %}{% if dcolor is object %}rgb({{ dcolor.r }},{{ dcolor.g }},{{ dcolor.b }}){% endif %}{% endif %}
+			{% if obj.tiny_preview %}url('{{ obj.tiny_preview }}'){% endif %}">
+				{% if obj.source %}
+					<picture>
+						{% set classic_idx = -1 %}
+						{% for src in obj.source %}
+							{% if not src.original %}
+								{% if src.type == "image/jpeg" or src.type == "image/png" %}
+									{% set_global classic_idx = loop.index0 %}
+								{% endif %}
+							{% endif %}
+						{% endfor %}
+						{% if classic_idx == -1 %}
+							{% set classic_idx = obj.source | length - 1 %}
+						{% endif %}
+						{% for src in obj.source %}
+							{% if not src.original %}
+								{% if loop.index0 == classic_idx %}
+									<img alt="{{ obj.alt | default(value="") }}" class="u-photo"
+									{% if src.srcset %}
+										{% set ssthing = src.srcset | first %}
+										src="{{ ssthing.src | safe }}"
+									{% elif src.src %}
+										src="{{ src.src | safe }}"
+									{% endif %}
+								{% else %}
+									<source type="{{ src.type | default(value="") }}"
+								{% endif %}
+								{% if src.srcset %}
+									srcset="{% for s in src.srcset %}{{ s.src | safe }} {{ s.width }}w,{% endfor %}"
+								{% elif src.src %}
+									srcset="{{ src.src | safe }}"
+								{% endif %}
+								>
+							{% endif %}
+						{% endfor %}
+					</picture>
+				{% elif obj.value %}
+					<img src="{{ obj.value | safe }}" alt="{{ obj.alt | default(value="") }}" class="u-photo">
+				{% else %}
+					<!-- WARN: no source or value in photo -->
+				{% endif %}
+			</responsive-container>
+			{% if obj.focal_length or obj.iso or obj.shutter_speed or obj.aperture %}
+				<figcaption class="entry-photo-meta">
+					{{ util::icon(icon="eye", title="Photo parameters") }}
+					{% if obj.focal_length %}
+						<span class="camera-focal-length">{{ obj.focal_length }} mm</span>
+					{% endif %}
+					{% if obj.iso %}
+						<span class="camera-iso">ISO {{ obj.iso }}</span>
+					{% endif %}
+					{% if obj.shutter_speed %}
+						{% set x = obj.shutter_speed[0] %}
+						{% set y = obj.shutter_speed[1] %}
+						<span class="camera-shutter">{% if x / y >= 0.3 %}{{ x / y | round(precision=2) }}s{% else %}{{ x }}/{{ y }}{% endif %}</span>
+					{% endif %}
+					{% if obj.aperture %}
+						<span class="camera-aperture">ƒ/{{ obj.aperture }}</span>
+					{% endif %}
+					{% for src in obj.source | default(value=[]) | filter(attribute="original", value=true) %}
+						{{ util::icon(icon="desktop-download") }}
+						<a class="camera-original"
+							{% if src.srcset %}
+								{% set ssthing = src.srcset | first %}
+								href="{{ ssthing.src | safe }}"
+							{% elif src.src %}
+								href="{{ src.src | safe }}"
+							{% endif %}
+						>Download original</a>
+					{% endfor %}
+				</figcaption>
+			{% endif %}
+		{% elif obj is string %}
+			<img src="{{ obj | safe }}" alt="" class="u-photo">
+		{% else %}
+			<!-- WARN: unrecognized type of object for photo -->
+		{% endif %}
+	</figure>
+{% endmacro photo %}
+
+{% macro video(obj) %}
+	<figure class="entry-video">
+		{% if obj is object %}
+			<responsive-container {% if obj.width and obj.height %}class="has-pad" style="padding-bottom: {{ obj.height / obj.width * 100 }}%;{% else %}style="{% endif %}
+			background:
+			{% if obj.palette %}{% set dcolor = obj.palette | first %}{% if dcolor is object %}rgb({{ dcolor.r }},{{ dcolor.g }},{{ dcolor.b }}){% endif %}{% endif %}
+			{% if obj.tiny_preview %}url('{{ obj.tiny_preview }}'){% endif %}">
+				{% if obj.source %}
+					<video class="u-video"
+						{% for src in obj.source %}
+							{% if src.type is starting_with("image/") %}
+								poster="{{ src.src | safe }}"
+							{% endif %}
+						{% endfor %}
+						{% if obj.controls is undefined or obj.controls %}controls{% endif %}
+						{% if obj.autoplay %}autoplay{% endif %}
+						{% if obj.loop %}loop{% endif %}
+						{% if obj.muted %}muted{% endif %}
+						{% if obj.playsinline %}playsinline{% endif %}
+						{% if obj.width %}width="{{ obj.width }}"{% endif %}
+						{% if obj.height %}width="{{ obj.height }}"{% endif %}
+					>
+						{% for src in obj.source %}
+							{% if not src.type is starting_with("image/") %}
+								<source src="{{ src.src | safe }}" type="{{ src.type | safe }}">
+							{% endif %}
+						{% endfor %}
+					</video>
+				{% elif obj.value %}
+					<video src="{{ obj.value | safe }}" class="u-video">
+				{% else %}
+					<!-- WARN: no source or value in video -->
+				{% endif %}
+			</responsive-container>
+		{% elif obj is string %}
+			<video src="{{ obj | safe }}" class="u-video">
+		{% else %}
+			<!-- WARN: unrecognized type of object for video -->
+		{% endif %}
+	</figure>
+{% endmacro video %}

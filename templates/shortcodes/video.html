@@ -1,0 +1,2 @@
+{% import "_media.html" as media %}
+{{ media::video(obj=page.extra.video | filter(attribute="id", value=id) | first) }}

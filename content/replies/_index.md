@@ -1,0 +1,6 @@
++++
+title = "Replies"
+sort_by = "date"
+paginate_by = 16
++++
+

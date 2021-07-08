@@ -1,0 +1,7 @@
+{% macro asset(path) %}/{{path}}?vsn={{ get_file_hash(path=path, sha_type=256) | truncate(length=12, end="") }}{% endmacro asset %}
+
+{% macro icon(icon, title=false, class="") %}
+	<svg aria-hidden="{% if title %}false{% else %}true{% endif %}" class="icon {{ class }}" role="image"{% if title %} title="{{ title }}"{% endif %}>
+		<use xlink:href="{{ self::asset(path="icons.svg") }}#{{ icon }}">{% if title %}<title>{{ title }}</title>{% endif %}</use>
+	</svg>
+{% endmacro icon %}

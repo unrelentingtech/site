@@ -1,0 +1,2 @@
+{% import "_media.html" as media %}
+{{ media::photo(obj=page.extra.photo | filter(attribute="id", value=id) | first) }}

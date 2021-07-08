@@ -1,0 +1,39 @@
+{% import "_util.html" as util %}
+{% import "_media.html" as media %}
+{% import "_content.html" as content %}
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; img-src data: https: 'self'; media-src https: 'self'; script-src 'self' 'nonce-{{ get_env(name="CSP_NONCE", default="SET_CSP_NONCE_YOU_FOOL") }}' 'strict-dynamic'; object-src 'none'; base-uri 'none'">
+		<title>{% block title %}{{ config.title | safe }}{% endblock %}</title>
+		<link href="{{ util::asset(path="style.css") }}" rel="stylesheet">
+		<link href="{{ current_url | safe }}" rel="canonical">
+		<link href="https://webmention.io/unrelenting.technology/webmention" rel="webmention">
+		<link href="https://pubsubhubbub.superfeedr.com/" rel="hub">
+		<link href="https://granary.io/url?hub=https%3A%2F%2Fpubsubhubbub.superfeedr.com%2F&amp;input=html&amp;output=atom&amp;url={{ config.base_url | urlencode_strict }}" rel="alternate home" type="application/atom+xml">
+		<link href="https://granary.io/url?hub=https%3A%2F%2Fpubsubhubbub.superfeedr.com%2F&amp;input=html&amp;output=atom&amp;url={{ current_url | urlencode_strict }}" rel="alternate" type="application/atom+xml">
+		<link href="https://granary.io/url?hub=https%3A%2F%2Fpubsubhubbub.superfeedr.com%2F&amp;input=html&amp;output=as2&amp;url={{ current_url | urlencode_strict }}" rel="alternate" type="application/activity+json">
+		<link href="{{ config.base_url | safe }}" rel="openid.delegate">
+		<link href="https://openid.indieauth.com/openid" rel="openid.server">
+	</head>
+	<body{% block bodyattrs %}{% endblock %}>
+		<h1 id="site-h1">
+			<a href="/" rel="home" type="text/html">{{ config.title }}</a>
+		</h1>
+		<nav id="site-nav">
+			<a href="/posts" rel="feed" type="text/html">Posts</a>
+			<a href="/articles" rel="feed" type="text/html">Articles</a>
+			<a href="/photos" rel="feed" type="text/html">Photos</a>
+			<a href="/kb" rel="feed" type="text/html">KB</a>
+		</nav>
+		<main>
+			{% block main %}{% endblock %}
+		</main>
+		<footer id="site-footer">
+			unrelenting.technology | powered by <a href="https://www.getzola.org">Zola</a>
+		</footer>
+		<script defer src="{{ util::asset(path="s.js") }}" nonce="{{ get_env(name="CSP_NONCE", default="SET_CSP_NONCE_YOU_FOOL") }}"></script>
+	</body>
+</html>
