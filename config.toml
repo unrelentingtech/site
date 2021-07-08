@@ -1,0 +1,16 @@
+base_url = "https://unrelenting.technology"
+title = "unrelenting.technology"
+compile_sass = false
+build_search_index = false
+trailing_slashes = false
+taxonomies = [
+	{ name = "tag", paginate_by = 16 }
+]
+
+[markdown]
+highlight_code = true
+highlight_theme = "base16-ocean-light"
+smart_punctuation = true
+
+[extra]
+# Put all your custom variables here

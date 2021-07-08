@@ -1,0 +1,23 @@
+{% extends "layout.html" %}
+{% block bodyattrs %} class="h-feed"{% endblock %}
+{% block title %}{{ section.title }} / {{ config.title | safe }}{% endblock %}
+
+{% block main %}
+	{% for page in paginator.pages %}
+		<article class="h-entry">
+			{{ content::post(page=page, on_permapage=false) }}
+		</article>
+	{% endfor %}
+	<nav class="feed-nav">
+		{% if paginator.previous %}
+			<a href="{{ paginator.previous | safe }}" rel="prev">
+				← newer entries
+			</a>&nbsp;
+		{% endif %}
+		{% if paginator.next %}
+			<a href="{{ paginator.next | safe }}" rel="next">
+				earlier entries →
+			</a>
+		{% endif %}
+	</nav>
+{% endblock %}
