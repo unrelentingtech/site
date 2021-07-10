@@ -9,7 +9,7 @@ taxonomies = [
 
 [markdown]
 highlight_code = true
-highlight_theme = "base16-ocean-light"
+highlight_theme = "css"
 smart_punctuation = true
 
 [extra]

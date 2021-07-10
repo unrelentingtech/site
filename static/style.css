@@ -246,3 +246,10 @@ article > figure { margin: 0; }
 
 /*body {position: relative;}
 body::after { content: ' ';	background: url(https://basehold.it/i/25.5); background-repeat: repeat; background-size: 4px var(--lineh); z-index: 666; display: block; width: auto; height: auto; pointer-events: none; position: absolute; top:0;bottom:0;left:0;right:0; opacity: 0.1;}*/
+
+.z-code .z-comment { color: #666; }
+.z-code .z-function, .z-code .z-tag, .z-code .z-object { color: #10a080; }
+.z-code .z-modifier { color: #bb8080; }
+.z-code .z-keyword, .z-code .z-property-name, .z-code .z-attribute-name { color: #3030bf; }
+.z-code .z-string { color: #e110ab; }
+.z-code .z-punctuation { color: #a04040; }
