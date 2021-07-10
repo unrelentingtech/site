@@ -1,0 +1,92 @@
+#!/usr/bin/env ruby
+require 'optparse'
+require 'date'
+require 'toml'
+require 'json'
+require 'uri'
+require 'net/http'
+require 'dotenv/load'
+
+raise 'Uncommitted changes!' unless `git status --porcelain=v1`.lines.reject { |l| l.start_with? '??' }.length == 0
+
+MF2 = URI('https://unrelenting.technology/mf2/parse.json')
+TLG = URI('https://telegraph.p3k.io/webmention')
+
+$dest = 'notes'
+$front = {
+  date: DateTime.now.new_offset(0)
+}
+$mentions = []
+
+def add_ctx(key, url)
+  STDERR.puts "=> Fetching #{url}"
+  html = Net::HTTP.get(URI(url))
+  STDERR.puts "=> Parsing via #{MF2}"
+  items = JSON.parse(Net::HTTP.post_form(MF2, html: html, base: url, jf2: 'on').body)["items"]
+  STDERR.puts "=> #{items.length} items found"
+  item = items.find { |i| i['type'] == 'entry' }
+  raise 'No entry found' unless item
+  item = item.slice 'url', 'published', 'name', 'author', 'content', 'type'
+  item['content'].delete 'html' if item['content']
+  begin
+    item['published'] = DateTime.parse(item['published']) if item['published']
+  rescue
+    STDERR.puts "=> Could not parse date #{item['published']}"
+  end
+  $front[:extra] ||= {}
+  $front[:extra][key] ||= []
+  $front[:extra][key] << item
+  $mentions << url
+end
+
+OptionParser.new do |parser|
+  parser.on '-r', '--reply URL', 'Write a reply to an URL' do |url|
+    $dest = 'replies'
+    add_ctx :in_reply_to, url
+  end
+  parser.on '-l', '--like URL', 'Write a like of an URL' do |url|
+    $dest = 'likes'
+    add_ctx :like_of, url
+  end
+  parser.on '-R', '--repost URL', 'Write a repost of an URL' do |url|
+    add_ctx :repost_of, url
+  end
+end.parse!
+
+
+upath = "#{$dest}/#{$front[:date].strftime '%F-%H-%M-%S'}"
+$front[:path] = "/#{upath}"
+path = "content/#{upath}.md"
+text = "+++\n#{TOML::Generator.new($front).body}\n+++\n\n"
+File.write path, text
+STDERR.puts "=> Created #{path}, editing with #{ENV['EDITOR']}"
+system ENV['EDITOR'], path
+STDERR.puts "=> Committing"
+system 'git', 'add', path
+system 'git', 'commit', '-m', "Posting #{path}"
+STDERR.puts "=> Pushing"
+system 'git', 'push'
+
+unless $mentions.empty?
+  tries = 0
+  url = URI("https://unrelenting.technology/#{upath}")
+  while tries < 10
+    STDERR.puts "=> Waiting for publish (#{tries})"
+    sleep 20
+    STDERR.puts "=> Checking #{url}"
+    resp = Net::HTTP.get_response(URI(url))
+    if resp.is_a?(Net::HTTPSuccess)
+      STDERR.puts "=> Yay! Found!"
+      $mentions.each do |murl|
+        STDERR.puts "=> Sending webmention for #{murl}"
+        resp = Net::HTTP.post_form(TLG, token: ENV['TLG_TOKEN'], source: url.to_s, target: murl)
+        STDERR.puts resp
+      end
+      exit 0
+    else
+      STDERR.puts "=> Not found still (#{resp})"
+    end
+    tries += 1
+  end
+  STDERR.puts "=> Tired of waiting…"
+end
