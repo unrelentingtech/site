@@ -253,3 +253,11 @@ body::after { content: ' ';	background: url(https://basehold.it/i/25.5); backgro
 .z-code .z-keyword, .z-code .z-property-name, .z-code .z-attribute-name { color: #3030bf; }
 .z-code .z-string { color: #e110ab; }
 .z-code .z-punctuation { color: #a04040; }
+
+.project-grid { display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(256px, 1fr)); grid-gap: var(--hspac); }
+.project-project { display: block; padding: calc(var(--hspac) * 2);
+  text-decoration: none; text-align: center; transition: transform ease-in-out 0.08s; }
+.project-title { font-size: 1.35em; font-weight: 700; margin: 0 0 var(--hspac); }
+.project-subtitle { font-size: 0.9em; font-weight: 300; }
+.project-project:hover, .project-project:focus { transform: scale(1.05) rotate(3deg); }
