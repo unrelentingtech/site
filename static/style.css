@@ -91,6 +91,8 @@ html {
 	* { font-synthesis: none; }
 }
 :root {
+	--micro-panel-accent: #275171;
+	--micro-panel-light-accent: #28587bba;
 	--fntsz: 14px;
 	--lineh: calc(var(--fntsz) * 1.5);
 	--hspac: calc(var(--lineh) * 0.889);
@@ -103,6 +105,9 @@ html {
 @media (min-width: 1300px) {
 	:root { --fntsz: 16px; }
 }
+body.with-mp { padding-top: calc(var(--lineh) * 3); }
+micro-panel { position: absolute; top: 0; bottom: 0; left: 0; right: 0; }
+micro-panel-toolbar { position: absolute; top: 0; width: 100%; }
 code { word-wrap: normal; }
 pre, code { white-space: pre-wrap; }
 input, abbr, acronym, blockquote, code, kbd, q, samp, var, #site-h1 { hyphens: none; }

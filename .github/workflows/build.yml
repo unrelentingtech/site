@@ -22,8 +22,9 @@ jobs:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
     - uses: actions/checkout@v1
+    - run: cat static/s.js static/a.js > static/sa.js && mv static/sa.js static/a.js
     - run: wget https://dl.unrelenting.technology/zola/zola-linux && chmod +x zola-linux
     - run: WMIO_TOKEN=${{ secrets.WMIO_TOKEN }} CSP_NONCE=$(openssl rand -base64 16) ./zola-linux build
-    - run: aws s3 sync public s3://unrelentingtech-site --delete --exclude icons.svg --exclude style.css --exclude s.js --exclude micro-panel-all.bundle.min.js --cache-control 'public, max-age=120' --storage-class STANDARD_IA
-    - run: aws s3 sync public s3://unrelentingtech-site --exclude '*' --include icons.svg --include style.css --include s.js --include micro-panel-all.bundle.min.js --cache-control 'public, max-age=31536000, immutable' --storage-class STANDARD_IA
+    - run: aws s3 sync public s3://unrelentingtech-site --delete --exclude icons.svg --exclude style.css --exclude s.js --exclude a.js --exclude micro-panel-all.bundle.min.js --cache-control 'public, max-age=120' --storage-class STANDARD_IA
+    - run: aws s3 sync public s3://unrelentingtech-site --exclude '*' --include icons.svg --include style.css --include s.js --include a.js --include micro-panel-all.bundle.min.js --cache-control 'public, max-age=31536000, immutable' --storage-class STANDARD_IA
     - run: aws cloudfront create-invalidation --distribution-id ${{ secrets.AWS_CF_DIST_ID }} --paths '/*'

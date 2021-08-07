@@ -18,7 +18,6 @@
 		alignToVGrid () {
 			/* Why is there no modulo in CSS calc?!? */
 			const lh = parseFloat(window.getComputedStyle(document.body).getPropertyValue('line-height'))
-			console.log(lh)
 			this.style.marginBottom = `${lh - this.getBoundingClientRect().height % lh}px`
 		}
 
