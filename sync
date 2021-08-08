@@ -89,7 +89,15 @@ end
 STDERR.puts "=> Notifying WebSub hub #{HUB}"
 resp = Net::HTTP.post_form(HUB,
   "hub.mode" => "publish",
-  "hub.url[]" => changed_urls.map { |url| "https://unrelenting.technology/#{url}" })
+  "hub.url[]" => changed_urls.flat_map { |url|
+    url = "https://unrelenting.technology/#{url}"
+    [
+      url,
+      "https://granary.io/url?" + URI.encode_www_form(hub: HUB, input: "html", output: "as2", url: url),
+      "https://granary.io/url?" + URI.encode_www_form(hub: HUB, input: "html", output: "atom", url: url),
+    ]
+  }
+)
 STDERR.puts "==> Response: #{resp}"
 
 if changed_urls.length > 10
