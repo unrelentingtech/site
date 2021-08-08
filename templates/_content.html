@@ -3,6 +3,7 @@
 {% macro cite(ctx, prop, lead="") %}
 	<div class="entry-ctx entry-txt h-cite u-{{ prop }}">
 		{{ lead }}
+		{% if ctx is object %}
 		<a href="{{ ctx.url | safe }}" class="u-url u-uid{% if ctx.name %} p-name{% endif %}">
 			{% if ctx.content and not ctx.name %}
 				a post
@@ -28,6 +29,11 @@
 			<blockquote class="e-content">
 				{{ ctx.content.text | truncate(length=512) }}
 			</blockquote>
+		{% endif %}
+		{% else %}
+		<a href="{{ ctx | safe }}" class="u-url u-uid">
+			{{ ctx | truncate(length=256) | safe }}
+		</a>
 		{% endif %}
 	</div>
 {% endmacro cite %}
