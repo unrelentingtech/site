@@ -10,7 +10,6 @@ require 'dotenv/load'
 raise 'Uncommitted changes!' unless `git status --porcelain=v1`.lines.reject { |l| l.start_with? '??' }.length == 0
 
 MF2 = URI('https://unrelenting.technology/mf2/parse.json')
-TLG = URI('https://telegraph.p3k.io/webmention')
 
 $dest = 'notes'
 $front = {
@@ -66,27 +65,3 @@ system 'git', 'add', path
 system 'git', 'commit', '-m', "Posting #{path}"
 STDERR.puts "=> Pushing"
 system 'git', 'push'
-
-unless $mentions.empty?
-  tries = 0
-  url = URI("https://unrelenting.technology/#{upath}")
-  while tries < 10
-    STDERR.puts "=> Waiting for publish (#{tries})"
-    sleep 20
-    STDERR.puts "=> Checking #{url}"
-    resp = Net::HTTP.get_response(URI(url))
-    if resp.is_a?(Net::HTTPSuccess)
-      STDERR.puts "=> Yay! Found!"
-      $mentions.each do |murl|
-        STDERR.puts "=> Sending webmention for #{murl}"
-        resp = Net::HTTP.post_form(TLG, token: ENV['TLG_TOKEN'], source: url.to_s, target: murl)
-        STDERR.puts resp
-      end
-      exit 0
-    else
-      STDERR.puts "=> Not found still (#{resp})"
-    end
-    tries += 1
-  end
-  STDERR.puts "=> Tired of waiting…"
-end

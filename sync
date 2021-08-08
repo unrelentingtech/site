@@ -1,0 +1,117 @@
+#!/usr/bin/env ruby
+require "set"
+require "json"
+require "digest"
+require "uri"
+require "net/http"
+
+BUCKET = "unrelentingtech-site"
+TLG = URI("https://telegraph.p3k.io/webmention")
+HUB = URI("https://pubsubhubbub.superfeedr.com/")
+
+STDERR.puts "=> Requesting S3 object list"
+etags = JSON.parse(`aws s3api list-objects-v2 --bucket #{BUCKET}`)["Contents"]
+  .each_with_object({}) { |entry, map|
+    map[entry["Key"]] = entry["ETag"].delete_prefix('"').delete_suffix('"')
+  }
+static = Dir["static/**/*"]
+  .select { |path| File.file? path }
+  .map { |path| path.delete_prefix "static/" }
+  .to_set
+changed = Dir["public/**/*"]
+  .select { |path| File.file? path }
+  .reject { |path| Digest::MD5.file(path).hexdigest == etags[path.delete_prefix("public/")] }
+  .map { |path| path.delete_prefix "public/" }
+
+if changed.length == 0
+  STDERR.puts "==> Exiting because no changes"
+  exit 0
+end
+
+STDERR.puts "==> Changed:"
+changed.each do |path|
+  STDERR.puts "    - #{path}"
+end
+
+STDERR.puts "=> Syncing"
+system "aws", "s3", "sync", "public", ("s3://" + BUCKET),
+  "--delete",
+  "--cache-control", "public, max-age=120",
+  "--exclude", "*",
+  *changed.reject { |path| static.include? path }.flat_map { |path| ["--include", path] }
+
+system "aws", "s3", "sync", "public", ("s3://" + BUCKET),
+  "--cache-control", "public, max-age=31536000, immutable",
+  "--exclude", "*",
+  *changed.select { |path| static.include? path }.flat_map { |path| ["--include", path] }
+
+changed_urls = changed
+  .reject { |path| static.include? path }
+  .select { |path| path.end_with? "index.html" }
+  .map { |path| path.delete_suffix("index.html").delete_suffix("/") }
+
+STDERR.puts "=> Clearing the cache"
+system "aws", "cloudfront", "create-invalidation", "--distribution-id", ENV["AWS_CF_DIST_ID"], "--paths", "/*"
+
+n_urls = [3, changed_urls.length].min
+STDERR.puts "=> Waiting for update (#{n_urls} URLs)"
+changed_urls.slice(0, n_urls).each do |url|
+  tries = 0
+  found = false
+  path = "public/#{url}/index.html".sub "//", "/"
+  url = URI("https://unrelenting.technology/#{url}")
+  expected_body = File.read(path).strip
+  while tries < 20 && !found
+    STDERR.puts "==> Checking #{url}"
+    resp = Net::HTTP.get_response(url)
+    if resp.is_a?(Net::HTTPSuccess)
+      body = resp.body.force_encoding("UTF-8").strip
+      if body == expected_body
+        STDERR.puts "===> Yay, contents match"
+        found = true
+      else
+        idx = body.each_char.with_index.find_index {|char, idx| char != expected_body[idx] }
+        STDERR.puts "===> Contents do not match at #{idx} ('#{body[idx..][..10]}' vs '#{expected_body[idx..][..10]}')"
+      end
+    else
+      STDERR.puts "===> Not found (#{resp})"
+    end
+    tries += 1
+    STDERR.puts "==> Waiting for publish (#{tries})"
+    sleep 4
+  end
+  if !found
+    STDERR.puts "==> Tired of waiting…"
+    exit 1
+  end
+end
+
+STDERR.puts "=> Notifying WebSub hub #{HUB}"
+resp = Net::HTTP.post_form(HUB,
+  "hub.mode" => "publish",
+  "hub.url[]" => changed_urls.map { |url| "https://unrelenting.technology/#{url}" })
+STDERR.puts "==> Response: #{resp}"
+
+if changed_urls.length > 10
+  STDERR.puts "=> Skipping WebMentions for mass update"
+else
+  STDERR.puts "=> Sending WebMentions via #{TLG}"
+  # TODO: implement in sellout
+
+  changed_urls.each do |url|
+    path = "public/#{url}/index.html".sub "//", "/"
+    url = URI("https://unrelenting.technology/#{url}")
+    txt = File.read(path)
+    txt[txt.index('<body')..]
+      .scan(/href=[\'"]?(https[^\'" >]+)/)
+      .map { |x| x.first }
+      .reject { |u| u.start_with? "https://unrelenting.technology" }
+      .uniq
+      .select { |u| URI(u).path.length > 1 }
+      .each do |tgt|
+        STDERR.puts "==> #{url} -> #{tgt}"
+        resp = Net::HTTP.post_form(TLG, token: ENV["TLG_TOKEN"], source: url.to_s, target: tgt.to_s)
+        STDERR.puts "==> Response: #{resp}"
+      end
+  end
+end
