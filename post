@@ -21,10 +21,13 @@ def add_ctx(key, url)
   STDERR.puts "=> Fetching #{url}"
   html = Net::HTTP.get(URI(url))
   STDERR.puts "=> Parsing via #{MF2}"
-  items = JSON.parse(Net::HTTP.post_form(MF2, html: html, base: url, jf2: 'on').body)["items"]
-  STDERR.puts "=> #{items.length} items found"
-  item = items.find { |i| i['type'] == 'entry' }
-  raise 'No entry found' unless item
+  item = JSON.parse(Net::HTTP.post_form(MF2, html: html, base: url, jf2: 'on').body)
+  if item['items']
+    items = item['items']
+    STDERR.puts "=> #{items.length} items found"
+    item = items.find { |i| i['type'] == 'entry' }
+    raise 'No entry found' unless item
+  end
   item = item.slice 'url', 'published', 'name', 'author', 'content', 'type'
   item['content'].delete 'html' if item['content']
   begin
