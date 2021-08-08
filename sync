@@ -99,6 +99,14 @@ else
   # TODO: implement in sellout
 
   changed_urls.each do |url|
+    unless url.include? "/"
+      STDERR.puts "==> Skipping category URL #{url}"
+      next
+    end
+    if url.include? "/page/"
+      STDERR.puts "==> Skipping category page URL #{url}"
+      next
+    end
     path = "public/#{url}/index.html".sub "//", "/"
     url = URI("https://unrelenting.technology/#{url}")
     txt = File.read(path)
