@@ -57,7 +57,7 @@
 		{% set posts = get_section(path="posts/_index.md") %}
 		{% for page in posts.pages | slice(end=5) %}
 			<article class="h-entry">
-				{{ content::post(page=page, on_permapage=false) }}
+				{{ content::post(entry=page, on_permapage=false) }}
 			</article>
 		{% endfor %}
 		<div class="entry-txt"><a href="/posts">read more</a></div>

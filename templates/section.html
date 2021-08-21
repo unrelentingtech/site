@@ -5,7 +5,7 @@
 {% block main %}
 	{% for page in paginator.pages %}
 		<article class="h-entry">
-			{{ content::post(page=page, on_permapage=false) }}
+			{{ content::post(entry=page, on_permapage=false) }}
 		</article>
 	{% endfor %}
 	<nav class="feed-nav">

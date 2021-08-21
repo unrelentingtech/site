@@ -48,80 +48,80 @@
 	</a>
 {% endmacro pile_cite %}
 
-{% macro post(page, on_permapage=false) %}
+{% macro post(entry, on_permapage=false) %}
 	{% set allmentions = load_data(url="https://webmention.io/api/mentions.jf2?domain=unrelenting.technology&token=" ~ get_env(name="WMIO_TOKEN", default="SET_WMIO_TOKEN_YOU_FOOL"), format="json") %}
-	{% set mentions = allmentions.children | filter(attribute="wm-target", value="https://unrelenting.technology" ~ page.path) %}
-	{% set replies = mentions | filter(attribute="in-reply-to", value="https://unrelenting.technology" ~ page.path) %}
-	{% set likes = mentions | filter(attribute="like-of", value="https://unrelenting.technology" ~ page.path) %}
-	{% set reposts = mentions | filter(attribute="repost-of", value="https://unrelenting.technology" ~ page.path) %}
-	{% set bookmarks = mentions | filter(attribute="bookmark-of", value="https://unrelenting.technology" ~ page.path) %}
+	{% set mentions = allmentions.children | filter(attribute="wm-target", value="https://unrelenting.technology" ~ entry.path) %}
+	{% set replies = mentions | filter(attribute="in-reply-to", value="https://unrelenting.technology" ~ entry.path) %}
+	{% set likes = mentions | filter(attribute="like-of", value="https://unrelenting.technology" ~ entry.path) %}
+	{% set reposts = mentions | filter(attribute="repost-of", value="https://unrelenting.technology" ~ entry.path) %}
+	{% set bookmarks = mentions | filter(attribute="bookmark-of", value="https://unrelenting.technology" ~ entry.path) %}
 
-	{% if page.extra.in_reply_to %}
+	{% if entry.extra.in_reply_to %}
 		{{ util::icon(icon="reply", class="entry-type-icon entry-type-icon-reply") }}
 	{% endif %}
 
-	{% if page.extra.like_of %}
+	{% if entry.extra.like_of %}
 		{{ util::icon(icon="star", class="entry-type-icon entry-type-icon-like") }}
 	{% endif %}
 
-	{% if page.extra.repost_of %}
+	{% if entry.extra.repost_of %}
 		{{ util::icon(icon="megaphone", class="entry-type-icon entry-type-icon-repost") }}
 	{% endif %}
 
-	{% if page.extra.bookmark_of %}
+	{% if entry.extra.bookmark_of %}
 		{{ util::icon(icon="bookmark", class="entry-type-icon entry-type-icon-bookmark") }}
 	{% endif %}
 
-	{% for ctx in page.extra.in_reply_to | default(value=[]) %}
+	{% for ctx in entry.extra.in_reply_to | default(value=[]) %}
 		{{ content::cite(ctx=ctx, prop="in-reply-to", lead="In reply to") }}
 	{% endfor %}
 
-	{% for ctx in page.extra.like_of | default(value=[]) %}
+	{% for ctx in entry.extra.like_of | default(value=[]) %}
 		{{ content::cite(ctx=ctx, prop="like-of", lead="Liked") }}
 	{% endfor %}
 
-	{% for ctx in page.extra.repost_of | default(value=[]) %}
+	{% for ctx in entry.extra.repost_of | default(value=[]) %}
 		{{ content::cite(ctx=ctx, prop="repost-of", lead="Repost of") }}
 	{% endfor %}
 
-	{% for ctx in page.extra.bookmark_of | default(value=[]) %}
+	{% for ctx in entry.extra.bookmark_of | default(value=[]) %}
 		{{ content::cite(ctx=ctx, prop="bookmark-of", lead="Bookmarked") }}
 	{% endfor %}
 
-	{% if page.title %}
+	{% if entry.title %}
 		<h1 class="p-name entry-txt">
-			<a href="{{ page.path | safe }}" class="u-url">
-				{{ page.title }}
+			<a href="{{ entry.path | safe }}" class="u-url">
+				{{ entry.title }}
 			</a>
 		</h1>
 	{% endif %}
 
-	{% for photo in page.extra.photo | default(value=[]) %}
+	{% for photo in entry.extra.photo | default(value=[]) %}
 		{% if not photo.id or photo.id | length == 0 %}
 			{{ media::photo(obj=photo) }}
 		{% endif %}
 	{% endfor %}
 
-	{% for video in page.extra.video | default(value=[]) %}
+	{% for video in entry.extra.video | default(value=[]) %}
 		{% if not video.id or video.id | length == 0 %}
 			{{ media::video(obj=video) }}
 		{% endif %}
 	{% endfor %}
 
 	<div class="e-content entry-txt">
-		{{ page.content | safe }}
+		{{ entry.content | safe }}
 	</div>
 
 	<div class="entry-info entry-txt">
 		posted
-		<time datetime="{{ page.date }}" class="dt-published">
-			<a class="u-url u-uid" href="{{ page.permalink | safe }}"{% if on_permapage %} rel="bookmark"{% endif %}>
-				{{ page.date | date(format="%b %d, %Y %R") }}
+		<time datetime="{{ entry.date }}" class="dt-published">
+			<a class="u-url u-uid" href="{{ entry.permalink | safe }}"{% if on_permapage %} rel="bookmark"{% endif %}>
+				{{ entry.date | date(format="%b %d, %Y %R") }}
 			</a>
 		</time>
 
 		in
-		{% for anc in page.ancestors %}
+		{% for anc in entry.ancestors %}
 			{% set sec = get_section(path=anc, metadata_only=true) %}
 			{% for incp in sec.includers %}
 				{% set inc = get_section(path=incp, metadata_only=true) %}
@@ -131,29 +131,29 @@
 				<a href="{{ sec.path | safe }}" rel="feed" type="text/html">{{ sec.title }}</a>
 			{% endif %}
 		{% endfor %}
-		{% for t, vs in page.taxonomies %}
+		{% for t, vs in entry.taxonomies %}
 			{% for k in vs %}
 				<a href="/{{ t | safe }}/{{ k | safe }}" rel="feed" type="text/html">#{{ k }}</a>
 			{% endfor %}
 		{% endfor %}
 
-		{% if page.extra.client_id %}
+		{% if entry.extra.client_id %}
 			using
-			{% for cid in page.extra.client_id %}
+			{% for cid in entry.extra.client_id %}
 				<a href="{{ cid | safe }}" class="u-client-id">
 					{{ cid | replace(from="http://", to="") | replace(from="https://", to="") }}
 				</a>
 			{% endfor %}
 		{% endif %}
 
-		{% if page.updated %}
+		{% if entry.updated %}
 			and updated
-			<time datetime="{{ page.updated }}" class="dt-updated">{{ page.updated | date(format="%b %d, %Y %R") }}</time>
+			<time datetime="{{ entry.updated }}" class="dt-updated">{{ entry.updated | date(format="%b %d, %Y %R") }}</time>
 		{% endif %}
 
-		{% if page.extra.syndication %}
+		{% if entry.extra.syndication %}
 			/ also on:
-			{% for syn in page.extra.syndication %}
+			{% for syn in entry.extra.syndication %}
 				<a href="{{ syn | safe }}" class="u-syndication">
 					{{ syn | replace(from="http://", to="") | replace(from="https://", to="") | split(pat="/") | first }}
 				</a>
