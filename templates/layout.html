@@ -6,9 +6,14 @@
 	<head>
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta name="theme-color" content="#FF8008">
+		{%- if page.description %}
+		<meta name="description" content="{{ page.description }}">
+		{%- endif %}
 		<meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; img-src data: https: 'self'; media-src https: 'self'; script-src 'self'; object-src 'none'; base-uri 'none'">
 		<title>{% block title %}{{ config.title | safe }}{% endblock %}</title>
 		<link href="{{ util::asset(path="style.css") }}" rel="stylesheet">
+		<link href="{{ util::asset(path="favicon.svg") }}" rel="icon">
 		<link href="{{ current_url | safe }}" rel="canonical">
 		<link href="https://webmention.io/unrelenting.technology/webmention" rel="webmention">
 		<link href="https://pubsubhubbub.superfeedr.com/" rel="hub">
@@ -19,21 +24,28 @@
 		<link href="https://openid.indieauth.com/openid" rel="openid.server">
 	</head>
 	<body{% block bodyattrs %}{% endblock %}>
-		<h1 id="site-h1">
-			<a href="/" rel="home" type="text/html">{{ config.title }}</a>
-		</h1>
-		<nav id="site-nav">
-			<a href="/posts" rel="feed" type="text/html">Posts</a>
-			<a href="/articles" rel="feed" type="text/html">Articles</a>
-			<a href="/photos" rel="feed" type="text/html">Photos</a>
-			<a href="/kb" rel="feed" type="text/html">KB</a>
-		</nav>
+		<header id="𝖍𝖊𝖆𝖉𝖊𝖗">
+			<nav>
+				<a href="/posts" rel="feed" type="text/html">{{ util::icon(icon="note") -}}Posts</a>
+				<a href="/articles" rel="feed" type="text/html">{{ util::icon(icon="pencil") -}}Articles</a>
+				<a href="/photos" rel="feed" type="text/html">{{ util::icon(icon="camera") -}}Photos</a>
+				<a href="/kb" rel="feed" type="text/html">{{ util::icon(icon="lightbulb") -}}KB</a>
+			</nav>
+			<h1>
+				<a href="/" rel="home" type="text/html" id="𝖘𝖎𝖙𝖊𝖓𝖆𝖒𝖊">{{ config.title }}</a>
+			</h1>
+			<div id="𝖙𝖆𝖌𝖑𝖎𝖓𝖊"><noscript>a site that uses javascript for no good reason</noscript></div>
+		</header>
 		<main>
 			{% block main %}{% endblock %}
 		</main>
-		<footer id="site-footer">
-			unrelenting.technology | powered by <a href="https://www.getzola.org">Zola</a>
+		<footer id="𝖋𝖔𝖔𝖙𝖊𝖗">
+			<a href="https://www.mozilla.org/en-US/firefox/new/" class="ᵇᵈᵍ ᶠˣ"><span>Get</span><span>Firefox</span></a>
+			<a href="https://indieweb.org/" class="ᵇᵈᵍ ᶦʷ"><span>IndieWeb</span></a>
+			<a href="https://indieweb.org/Webmention" class="ᵇᵈᵍ ʷᵐ"><span>WebMention</span></a>
+			<a href="https://microformats.io/" class="ᵇᵈᵍ ᵐᶠ"><span>Microformats</span></a>
+			<a href="https://github.com/unrelentingtech/site" class="ᵇᵈᵍ ˢʳᶜ"><span>open</span><span>source</span></a>
 		</footer>
-		<script defer src="{{ util::asset(path="s.js") }}"></script>
+		<script src="{{ util::asset(path="s.js") }}"></script>
 	</body>
 </html>

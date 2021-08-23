@@ -1,0 +1,13 @@
+{% extends "section.html" %}
+
+{% block cont %}
+	<ul class="gallery">
+		{% for page in paginator.pages %}
+			<li class="h-entry">
+				{% for photo in page.extra.photo | default(value=[]) %}
+					{{ media::photo(obj=photo, link=page) }}
+				{% endfor %}
+			</li>
+		{% endfor %}
+	</ul>
+{% endblock %}

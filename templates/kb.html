@@ -1,12 +1,12 @@
-{% extends "layout.html" %}
-{% block bodyattrs %} class="h-feed"{% endblock %}
-{% block title %}{{ section.title }} / {{ config.title | safe }}{% endblock %}
+{% extends "section.html" %}
 
-{% block main %}
-	<article>
+{% block cont %}
+	<article class="post-preview">
 		<ul>
 			{% for page in section.pages %}
-			<li class="h-entry"><a href="{{ page.path | safe }}" class="u-url u-uid">{{ page.title }}</a></li>
+				<li class="h-entry">
+					<a href="{{ page.path | safe }}" class="u-url u-uid">{{ page.title }}</a>
+				</li>
 			{% endfor %}
 		</ul>
 	</article>

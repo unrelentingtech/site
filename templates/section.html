@@ -3,11 +3,19 @@
 {% block title %}{{ section.title }} / {{ config.title | safe }}{% endblock %}
 
 {% block main %}
-	{% for page in paginator.pages %}
-		<article class="h-entry">
-			{{ content::post(entry=page, on_permapage=false) }}
-		</article>
-	{% endfor %}
+	<h1 class="posthead p-name">
+		{%- block heading %}{{ section.title }}{% endblock -%}
+	</h1>
+	{% if section and section.description %}
+		<p class="subhead p-summary">
+			{{ section.description | safe }}
+		</p>
+	{% endif %}
+	{% block cont %}
+		{% for page in paginator.pages | default(value=section.pages) %}
+			{{ content::post_preview(entry=page) }}
+		{% endfor %}
+	{% endblock %}
 	<nav class="feed-nav">
 		{% if paginator.previous %}
 			<a href="{{ paginator.previous | safe }}" rel="prev">

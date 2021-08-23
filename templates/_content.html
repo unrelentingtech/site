@@ -1,42 +1,47 @@
 {% import "_media.html" as media %}
 
-{% macro cite(ctx, prop, lead="") %}
-	<div class="entry-ctx entry-txt h-cite u-{{ prop }}">
-		{{ lead }}
-		{% if ctx is object %}
+{% macro cite_info(ctx) %}
+	{% if ctx is object %}
 		<a href="{{ ctx.url | safe }}" class="u-url u-uid{% if ctx.name %} p-name{% endif %}">
-			{% if ctx.content and not ctx.name %}
+			{%- if ctx.content and not ctx.name -%}
 				a post
-			{% else %}
+			{%- else -%}
 				{{ ctx.name | default(value=ctx.url) | truncate(length=256) | safe }}
-			{% endif %}
+			{%- endif -%}
 		</a>
 		{% if ctx.author %}
 			by
-			{% if ctx.author is object %}
-				<a href="{{ ctx.author.url | safe }}" class="p-author h-card">{{ ctx.author.name }}</a>
-			{% else %}
+			{% if ctx.author is object -%}
+				<a href="{{ ctx.author.url | safe }}" class="h-card">
+					{% if ctx.author.photo -%}
+						<img class="u-photo cite-pic" src="{{ ctx.author.photo | safe }}" alt="">
+					{%- endif %}
+					<span class="p-author">{{ ctx.author.name }}</span>
+				</a>
+			{%- else -%}
 				<a href="{{ ctx.author | safe }}" class="p-author h-card">{{ ctx.author | safe }}</a>
-			{% endif %}
+			{%- endif %}
 		{% endif %}
 		{% if ctx.published %}
 			on
 			<time datetime="{{ ctx.published }}" class="dt-published">
-				{{ ctx.published | date(format="%b %d, %Y %R") }}
+				{{- ctx.published | date(format="%b %d, %Y %R") -}}
 			</time>
 		{% endif %}
-		{% if ctx.content and ctx.content.text and not ctx.name %}
-			<blockquote class="e-content">
-				{{ ctx.content.text | truncate(length=512) }}
-			</blockquote>
-		{% endif %}
-		{% else %}
+	{% else %}
 		<a href="{{ ctx | safe }}" class="u-url u-uid">
-			{{ ctx | truncate(length=256) | safe }}
+			{{- ctx | truncate(length=256) | safe -}}
 		</a>
-		{% endif %}
-	</div>
-{% endmacro cite %}
+	{% endif %}
+{% endmacro cite_info %}
+
+{% macro cite_content(ctx) %}
+	{% if ctx is object and ctx.content and ctx.content.text and not ctx.name %}
+		<blockquote class="e-content">
+			<p>{{ ctx.content.text | truncate(length=512) }}</p>
+		</blockquote>
+	{% endif %}
+{% endmacro cite_content %}
 
 {% macro pile_cite(ctx, prop) %}
 	<a href="{{ ctx.url | safe }}" class="h-cite u-{{ prop }}">
@@ -48,54 +53,25 @@
 	</a>
 {% endmacro pile_cite %}
 
-{% macro post(entry, on_permapage=false) %}
-	{% set allmentions = load_data(url="https://webmention.io/api/mentions.jf2?domain=unrelenting.technology&token=" ~ get_env(name="WMIO_TOKEN", default="SET_WMIO_TOKEN_YOU_FOOL"), format="json") %}
-	{% set mentions = allmentions.children | filter(attribute="wm-target", value="https://unrelenting.technology" ~ entry.path) %}
-	{% set replies = mentions | filter(attribute="in-reply-to", value="https://unrelenting.technology" ~ entry.path) %}
-	{% set likes = mentions | filter(attribute="like-of", value="https://unrelenting.technology" ~ entry.path) %}
-	{% set reposts = mentions | filter(attribute="repost-of", value="https://unrelenting.technology" ~ entry.path) %}
-	{% set bookmarks = mentions | filter(attribute="bookmark-of", value="https://unrelenting.technology" ~ entry.path) %}
-
-	{% if entry.extra.in_reply_to %}
-		{{ util::icon(icon="reply", class="entry-type-icon entry-type-icon-reply") }}
-	{% endif %}
-
-	{% if entry.extra.like_of %}
-		{{ util::icon(icon="star", class="entry-type-icon entry-type-icon-like") }}
-	{% endif %}
-
-	{% if entry.extra.repost_of %}
-		{{ util::icon(icon="megaphone", class="entry-type-icon entry-type-icon-repost") }}
-	{% endif %}
-
-	{% if entry.extra.bookmark_of %}
-		{{ util::icon(icon="bookmark", class="entry-type-icon entry-type-icon-bookmark") }}
-	{% endif %}
-
-	{% for ctx in entry.extra.in_reply_to | default(value=[]) %}
-		{{ content::cite(ctx=ctx, prop="in-reply-to", lead="In reply to") }}
+{% macro cats(entry) %}
+	{% for anc in entry.ancestors -%}
+		{% set sec = get_section(path=anc, metadata_only=true) -%}
+		{% for incp in sec.includers -%}
+			{% set inc = get_section(path=incp, metadata_only=true) -%}
+			<a href="{{ inc.path | safe }}" class="p-category" rel="feed" type="text/html">{{ inc.title }}</a>
+		{% endfor %}
+		{% if sec.path != "/" %}
+			<a href="{{ sec.path | safe }}" class="p-category" rel="feed" type="text/html">{{ sec.title }}</a>
+		{% endif %}
 	{% endfor %}
-
-	{% for ctx in entry.extra.like_of | default(value=[]) %}
-		{{ content::cite(ctx=ctx, prop="like-of", lead="Liked") }}
+	{% for t, vs in entry.taxonomies -%}
+		{% for k in vs -%}
+			<a href="/{{ t | safe }}/{{ k | safe }}" class="p-category" rel="feed" type="text/html">#{{ k }}</a>
+		{% endfor %}
 	{% endfor %}
+{% endmacro cats %}
 
-	{% for ctx in entry.extra.repost_of | default(value=[]) %}
-		{{ content::cite(ctx=ctx, prop="repost-of", lead="Repost of") }}
-	{% endfor %}
-
-	{% for ctx in entry.extra.bookmark_of | default(value=[]) %}
-		{{ content::cite(ctx=ctx, prop="bookmark-of", lead="Bookmarked") }}
-	{% endfor %}
-
-	{% if entry.title %}
-		<h1 class="p-name entry-txt">
-			<a href="{{ entry.path | safe }}" class="u-url">
-				{{ entry.title }}
-			</a>
-		</h1>
-	{% endif %}
-
+{% macro content(entry) %}
 	{% for photo in entry.extra.photo | default(value=[]) %}
 		{% if not photo.id or photo.id | length == 0 %}
 			{{ media::photo(obj=photo) }}
@@ -108,121 +84,99 @@
 		{% endif %}
 	{% endfor %}
 
-	<div class="e-content entry-txt">
-		{{ entry.content | safe }}
-	</div>
+	{{ entry.content | safe }}
+{% endmacro content %}
 
-	<div class="entry-info entry-txt">
-		posted
-		<time datetime="{{ entry.date }}" class="dt-published">
-			<a class="u-url u-uid" href="{{ entry.permalink | safe }}"{% if on_permapage %} rel="bookmark"{% endif %}>
-				{{ entry.date | date(format="%b %d, %Y %R") }}
+{% macro post_preview(entry) %}
+	<article class="h-entry post-preview {% if entry.extra.in_reply_to -%}
+				reply-preview
+			{%- elif entry.extra.like_of -%}
+				like-preview
+			{%- elif entry.extra.repost_of -%}
+				repost-preview
+			{%- elif entry.extra.bookmark_of -%}
+				bookmark-preview
+			{%- elif entry.title -%}
+				article-preview
+			{%- else -%}
+				note-preview
+			{%- endif %}">
+		<div>
+			<a class="u-url u-uid perma-link" href="{{ entry.permalink | safe }}">
+				{% if entry.extra.in_reply_to %}
+					{{ util::icon(icon="reply") }}
+				{% elif entry.extra.like_of %}
+					{{ util::icon(icon="star") }}
+				{% elif entry.extra.repost_of %}
+					{{ util::icon(icon="megaphone") }}
+				{% elif entry.extra.bookmark_of %}
+					{{ util::icon(icon="bookmark") }}
+				{% elif entry.title %}
+					{{ util::icon(icon="pencil") }}
+				{% else %}
+					{{ util::icon(icon="note") }}
+				{% endif %}
+
+				<time datetime="{{ entry.date }}" class="dt-published side-date">
+					{{- entry.date | date(format="%b %d, %Y") -}}
+				</time>
 			</a>
-		</time>
-
-		in
-		{% for anc in entry.ancestors %}
-			{% set sec = get_section(path=anc, metadata_only=true) %}
-			{% for incp in sec.includers %}
-				{% set inc = get_section(path=incp, metadata_only=true) %}
-				<a href="{{ inc.path | safe }}" rel="feed" type="text/html">{{ inc.title }}</a>
-			{% endfor %}
-			{% if sec.path != "/" %}
-				<a href="{{ sec.path | safe }}" rel="feed" type="text/html">{{ sec.title }}</a>
-			{% endif %}
-		{% endfor %}
-		{% for t, vs in entry.taxonomies %}
-			{% for k in vs %}
-				<a href="/{{ t | safe }}/{{ k | safe }}" rel="feed" type="text/html">#{{ k }}</a>
-			{% endfor %}
-		{% endfor %}
-
-		{% if entry.extra.client_id %}
-			using
-			{% for cid in entry.extra.client_id %}
-				<a href="{{ cid | safe }}" class="u-client-id">
-					{{ cid | replace(from="http://", to="") | replace(from="https://", to="") }}
-				</a>
-			{% endfor %}
-		{% endif %}
-
-		{% if entry.updated %}
-			and updated
-			<time datetime="{{ entry.updated }}" class="dt-updated">{{ entry.updated | date(format="%b %d, %Y %R") }}</time>
-		{% endif %}
-
-		{% if entry.extra.syndication %}
-			/ also on:
-			{% for syn in entry.extra.syndication %}
-				<a href="{{ syn | safe }}" class="u-syndication">
-					{{ syn | replace(from="http://", to="") | replace(from="https://", to="") | split(pat="/") | first }}
-				</a>
-			{% endfor %}
-		{% endif %}
-
-		{% if not on_permapage %}
-			{% if replies %}
-				<span class="reaction-count">
-					{{ util::icon(icon="reply", class="reaction-type-icon reaction-type-icon-reply", title="number of replies:") }}
-					{{ replies | length }}
-				</span>
-			{% endif %}
-			{% if likes %}
-				<span class="reaction-count">
-					{{ util::icon(icon="star", class="reaction-type-icon reaction-type-icon-like", title="number of likes:") }}
-					{{ likes | length }}
-				</span>
-			{% endif %}
-			{% if reposts %}
-				<span class="reaction-count">
-					{{ util::icon(icon="megaphone", class="reaction-type-icon reaction-type-icon-repost", title="number of reposts:") }}
-					{{ reposts | length }}
-				</span>
-			{% endif %}
-			{% if bookmarks %}
-				<span class="reaction-count">
-					{{ util::icon(icon="bookmark", class="reaction-type-icon reaction-type-icon-bookmark", title="number of bookmarks:") }}
-					{{ bookmarks | length }}
-				</span>
-			{% endif %}
-		{% endif %}
-	</div>
-
-	{% set has_facepiles = likes or reposts or bookmarks %}
-	{% if on_permapage and has_facepiles %}
-		<div class="entry-facepiles entry-txt">
-			{% if likes %}
-				<div class="entry-facepile">
-					{{ util::icon(icon="star", class="reaction-type-icon reaction-type-icon-like", title="Likes:") }}
-					{% for ctx in likes %}
-						{{ content::pile_cite(ctx=ctx, prop="like") }}
-					{% endfor %}
+		</div>
+		<div>
+			{% for ctx in entry.extra.in_reply_to | default(value=[]) %}
+				<div class="h-cite u-in-reply-to">In reply to
+					{{ content::cite_info(ctx=ctx) }}
+					{{ content::cite_content(ctx=ctx) }}
 				</div>
-			{% endif %}
-			{% if reposts %}
-				<div class="entry-facepile">
-					{{ util::icon(icon="megaphone", class="reaction-type-icon reaction-type-icon-repost", title="Reposts:") }}
-					{% for ctx in reposts %}
-						{{ content::pile_cite(ctx=ctx, prop="repost") }}
-					{% endfor %}
+			{% endfor %}
+
+			{% for ctx in entry.extra.like_of | default(value=[]) %}
+				<div class="h-cite u-like-of">Liked
+					{{ content::cite_info(ctx=ctx) }}
+					{{ content::cite_content(ctx=ctx) }}
 				</div>
-			{% endif %}
-			{% if bookmarks %}
-				<div class="entry-facepile">
-					{{ util::icon(icon="bookmark", class="reaction-type-icon reaction-type-icon-bookmark", title="Bookmark:") }}
-					{% for ctx in bookmarks %}
-						{{ content::pile_cite(ctx=ctx, prop="bookmark") }}
-					{% endfor %}
+			{% endfor %}
+
+			{% for ctx in entry.extra.repost_of | default(value=[]) %}
+				<div class="h-cite u-repost-of">Repost of
+					{{ content::cite_info(ctx=ctx) }}
+					{{ content::cite_content(ctx=ctx) }}
+				</div>
+			{% endfor %}
+
+			{% for ctx in entry.extra.bookmark_of | default(value=[]) %}
+				<div class="h-cite u-bookmark-of">Bookmarked
+					{{ content::cite_info(ctx=ctx) }}
+					{{ content::cite_content(ctx=ctx) }}
+				</div>
+			{% endfor %}
+
+			{% if entry.title %}
+				<div class="my-content">
+					<h1>
+						<a href="{{ entry.permalink | safe }}" class="p-name u-url u-uid">{{ entry.title }}</a>
+					</h1>
+
+					{% if entry.description %}
+						<p class="p-summary">{{ entry.description }}</p>
+					{% endif %}
+
+					{% if entry.taxonomies %}
+						<div>
+							{{ util::icon(icon="tag", title="Tags") }}
+							{% for t, vs in entry.taxonomies -%}
+								{% for k in vs -%}
+									<a href="/{{ t | safe }}/{{ k | safe }}" class="p-category" rel="feed" type="text/html">#{{ k }}</a>
+								{% endfor %}
+							{% endfor %}
+						</div>
+					{% endif %}
+				</div>
+			{% else %}
+				<div class="e-content my-content">
+					{{ content::content(entry=entry) }}
 				</div>
 			{% endif %}
 		</div>
-	{% endif %}
-
-	{% if on_permapage and replies %}
-		<div class="entry-replies">
-			{% for ctx in replies %}
-				{{ content::cite(ctx=ctx, prop="comment", lead="Reply:") }}
-			{% endfor %}
-		</div>
-	{% endif %}
-{% endmacro post %}
+	</article>
+{% endmacro post_preview %}

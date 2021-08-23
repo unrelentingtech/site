@@ -1,7 +1,29 @@
-{% macro asset(path) %}/{{path}}?vsn={{ get_file_hash(path=path, sha_type=256) | truncate(length=12, end="") }}{% endmacro asset %}
+{% macro asset(path) -%}
+	/{{path}}?vsn={{ get_file_hash(path=path, sha_type=256) | truncate(length=12, end="") }}
+{%- endmacro asset %}
 
-{% macro icon(icon, title=false, class="") %}
+{% macro icon(icon, title=false, class="") -%}
 	<svg aria-hidden="{% if title %}false{% else %}true{% endif %}" class="icon {{ class }}" role="image"{% if title %} title="{{ title }}"{% endif %}>
 		<use xlink:href="{{ self::asset(path="icons.svg") }}#{{ icon }}">{% if title %}<title>{{ title }}</title>{% endif %}</use>
 	</svg>
-{% endmacro icon %}
+{%- endmacro icon %}
+
+{% macro resp_cont_open(obj) -%}
+	<resp-cont
+		{% if obj.width and obj.height -%}
+			class="has-pad" style="padding-bottom: {{ obj.height / obj.width * 100 }}%;
+		{%- else -%}
+			style="
+		{%- endif -%}
+			background:
+			{% if obj.palette %}
+				{% set dcolor = obj.palette | first -%}
+				{%- if dcolor is object -%}
+					rgb({{ dcolor.r }},{{ dcolor.g }},{{ dcolor.b }})
+				{%- endif -%}
+			{%- endif -%}
+			{%- if obj.tiny_preview %}
+				url('{{ obj.tiny_preview | safe }}')
+			{%- endif -%}
+			">
+{%- endmacro resp_cont_open %}
