@@ -2,6 +2,7 @@
 date = 2017-07-20T20:39:20+00:00
 path = "/articles/moving-vms-from-virtualbox-to-client-hyper-v"
 title = "Moving VMs from VirtualBox to Client Hyper-V"
+description = "The year of the Windows desktop?"
 updated = 2021-06-27T20:20:31+00:00
 
 [extra]

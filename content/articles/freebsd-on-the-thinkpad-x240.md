@@ -2,6 +2,7 @@
 date = 2016-01-03T11:17:53+00:00
 path = "/articles/freebsd-on-the-thinkpad-x240"
 title = "FreeBSD on the ThinkPad X240"
+description = "The beginning of my FreeBSD laptop adventure."
 updated = 2017-11-23T11:19:35+00:00
 
 [extra]

@@ -2,6 +2,7 @@
 date = 2019-10-06T20:38:20+00:00
 path = "/articles/FreeBSD-and-custom-firmware-on-the-Google-Pixelbook"
 title = "FreeBSD and custom firmware on the Google Pixelbook"
+description = "A search for a new thin-and-light laptop, a journey through the Chromebook firmware trust architecture, some FreeBSD kernel development, and finally, something about actually customizing open source firmware."
 updated = 2019-10-24T00:00:52+00:00
 
 [taxonomies]
