@@ -62,22 +62,6 @@ r = 183
 
 [[extra.photo.source]]
 original = false
-type = "image/jpeg"
-
-[[extra.photo.source.srcset]]
-src = "https://dl.unrelenting.technology/a45b4ba67843_img-8724.3000.jpg"
-width = 3000
-
-[[extra.photo.source.srcset]]
-src = "https://dl.unrelenting.technology/a45b4ba67843_img-8724.2000.jpg"
-width = 2000
-
-[[extra.photo.source.srcset]]
-src = "https://dl.unrelenting.technology/a45b4ba67843_img-8724.1000.jpg"
-width = 1000
-
-[[extra.photo.source]]
-original = false
 type = "image/webp"
 
 [[extra.photo.source.srcset]]
@@ -90,6 +74,22 @@ width = 2000
 
 [[extra.photo.source.srcset]]
 src = "https://dl.unrelenting.technology/a45b4ba67843_img-8724.1000.webp"
+width = 1000
+
+[[extra.photo.source]]
+original = false
+type = "image/jpeg"
+
+[[extra.photo.source.srcset]]
+src = "https://dl.unrelenting.technology/a45b4ba67843_img-8724.3000.jpg"
+width = 3000
+
+[[extra.photo.source.srcset]]
+src = "https://dl.unrelenting.technology/a45b4ba67843_img-8724.2000.jpg"
+width = 2000
+
+[[extra.photo.source.srcset]]
+src = "https://dl.unrelenting.technology/a45b4ba67843_img-8724.1000.jpg"
 width = 1000
 
 [[extra.photo.source]]
