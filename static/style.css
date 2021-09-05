@@ -2,13 +2,13 @@
 @font-face {
 	font-family: Inter; font-style: normal; font-weight: 400;
 	font-display: swap;
-	src: url("fnt/Inter-Regular.woff2?vsn=3.9") format("woff2"), url("fnt/Inter-Regular.woff?vsn=3.9") format("woff");
+	src: url("fnt/Inter-Regular.woff?vsn=3.19") format("woff");
 }
 @font-face {
 	font-family: InterV; font-weight: 100 900; font-style: normal;
 	font-named-instance: 'Regular';
 	font-display: swap;
-	src: url("fnt/Inter-upright.var.woff2?vsn=3.9") format("woff2");
+	src: url("fnt/Inter-roman.var.woff2?vsn=3.19") format("woff2");
 }
 
 html {font-family:Inter,system-ui,sans-serif,"Noto Color Emoji","Apple Color Emoji","Segoe UI Emoji"}
