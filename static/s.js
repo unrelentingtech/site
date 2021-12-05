@@ -47,13 +47,14 @@
 			return part + " months ago"
 		}
 		if (ago < 1419120000)
-			return "over a year ago"
+			return ""
 	}
 
 	customElements.define('hammer-time', class extends HTMLElement {
 		updateTime () {
 			const ago = Math.floor((Date.now() - this.parsedDate) / 1000)
-			this.agoTargetEl.innerText = `(${timeAgo(ago)})`
+			const agoText = timeAgo(ago)
+			this.agoTargetEl.innerText = agoText.length > 0 ? `(${agoText})` : ''
 			return ago
 		}
 
