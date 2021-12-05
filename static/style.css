@@ -170,7 +170,7 @@ h1 + .post-preview {margin-top:1rem}
 	.chungus {max-width:90ch}
 }
 @media screen and (min-width:1500px) {
-	.gallery {max-width:90%}
+	.gallery {max-width:min(90%,150ch)}
 }
 
 a.ᵇᵈᵍ {display:inline-flex;align-items:center;width:80px;height:15px;vertical-align:middle;font:8px Slkscr;text-decoration:none;-webkit-font-smoothing:none;image-rendering:pixelated}

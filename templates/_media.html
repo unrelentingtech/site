@@ -51,42 +51,6 @@
 					</a>
 				{% endif %}
 			</resp-cont>
-			{% if obj.focal_length or obj.iso or obj.shutter_speed or obj.aperture %}
-				<figcaption class="entry-photo-meta">
-					{{ util::icon(icon="camera", title="Photo parameters") }}
-					{% if obj.focal_length %}
-						<span class="camera-focal-length">{{ obj.focal_length }} mm</span>
-					{% endif %}
-					{% if obj.iso %}
-						<span class="camera-iso">ISO {{ obj.iso }}</span>
-					{% endif %}
-					{% if obj.shutter_speed %}
-						{%- set x = obj.shutter_speed[0] -%}
-						{%- set y = obj.shutter_speed[1] -%}
-						<span class="camera-shutter">
-							{%- if x / y >= 0.3 -%}
-								{{- x / y | round(precision=2) }}s
-							{%- else -%}
-								{{- x }}/{{ y -}}
-							{%- endif -%}
-						</span>
-					{% endif %}
-					{% if obj.aperture %}
-						<span class="camera-aperture">ƒ/{{ obj.aperture }}</span>
-					{% endif %}
-					{% for src in obj.source | default(value=[]) | filter(attribute="original", value=true) %}
-						{{ util::icon(icon="download") }}
-						<a class="camera-original"
-							{% if src.srcset -%}
-								{%- set ssthing = src.srcset | first -%}
-								href="{{ ssthing.src | safe }}"
-							{%- elif src.src -%}
-								href="{{ src.src | safe }}"
-							{%- endif -%}
-						>Download original</a>
-					{% endfor %}
-				</figcaption>
-			{% endif %}
 		{% elif obj is string %}
 			<img src="{{ obj | safe }}" alt="" class="u-photo">
 		{% else %}

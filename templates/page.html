@@ -89,9 +89,49 @@
 				{{ content::cats(entry=entry) }}
 			</section>
 
+			{% if entry.extra.photo and entry.extra.photo | length == 1 %}
+				{%- set thephoto = entry.extra.photo | first -%}
+				<section>
+					<h1>{{ util::icon(icon="camera") }} Photo information</h1>
+					{% if thephoto.focal_length %}
+						<span class="camera-focal-length">{{ thephoto.focal_length }} mm</span>
+					{% endif %}
+					{% if thephoto.iso %}
+						<span class="camera-iso">ISO {{ thephoto.iso }}</span>
+					{% endif %}
+					{% if thephoto.shutter_speed %}
+						{%- set x = thephoto.shutter_speed[0] -%}
+						{%- set y = thephoto.shutter_speed[1] -%}
+						<span class="camera-shutter">
+							{%- if x / y >= 0.3 -%}
+								{{- x / y | round(precision=2) }}s
+							{%- else -%}
+								{{- x }}/{{ y -}}
+							{%- endif -%}
+						</span>
+					{% endif %}
+					{% if thephoto.aperture %}
+						<span class="camera-aperture">ƒ/{{ thephoto.aperture }}</span>
+					{% endif %}
+					{% for src in thephoto.source | default(value=[]) | filter(attribute="original", value=true) %}
+						<p>
+							{{ util::icon(icon="download") }}
+							<a class="camera-original"
+								{% if src.srcset -%}
+									{%- set ssthing = src.srcset | first -%}
+									href="{{ ssthing.src | safe }}"
+								{%- elif src.src -%}
+									href="{{ src.src | safe }}"
+								{%- endif -%}
+							>Download original</a>
+						</p>
+					{% endfor %}
+				</section>
+			{% endif %}
+
 			{% if entry.extra.client_id %}
 				<section>
-					<h1>{{ util::icon(icon="appedit") }} Using</h1>
+					<h1>{{ util::icon(icon="appedit") }} Posted using</h1>
 					{% for cid in entry.extra.client_id %}
 						<a href="{{ cid | safe }}" class="u-client-id">
 							{{- cid | replace(from="http://", to="") | replace(from="https://", to="") | trim_end_matches(pat="/") -}}
@@ -102,7 +142,7 @@
 
 			{% if entry.extra.syndication %}
 				<section>
-					<h1>{{ util::icon(icon="copy") }} Also on:</h1>
+					<h1>{{ util::icon(icon="copy") }} Also on</h1>
 					{% for syn in entry.extra.syndication %}
 						<a href="{{ syn | safe }}" class="u-syndication">
 							{{- syn | replace(from="http://", to="") | replace(from="https://", to="") | split(pat="/") | first -}}
