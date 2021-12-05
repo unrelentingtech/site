@@ -10,6 +10,22 @@
 	if (navigator.userAgent.indexOf("Chrome") !== -1)
 		document.querySelector('.ᵇᵈᵍ.ᶠˣ').classList.add('burgeoning')
 
+	document.addEventListener('keyup', (evt) => {
+		if (evt.ctrlKey || (isMac && evt.metaKey)) {
+			if (evt.keyCode == 37)
+				document.querySelector('[rel=next]').click()
+			if (evt.keyCode == 39)
+				document.querySelector('[rel=prev]').click()
+		}
+	})
+	const isMac = navigator.userAgent.indexOf("Mac OS X") !== -1
+	const relNextTitle = document.querySelector('[rel=next] > svg title')
+	if (relNextTitle)
+		relNextTitle.innerHTML += ` (${isMac ? '⌘' : 'Ctrl-'}←)`
+	const relPrevTitle = document.querySelector('[rel=prev] > svg title')
+	if (relPrevTitle)
+		relPrevTitle.innerHTML += ` (${isMac ? '⌘' : 'Ctrl-'}→)`
+
 	function findDeepEl (el) {
 		if (el.lastElementChild) return findDeepEl(el.lastElementChild)
 		return el

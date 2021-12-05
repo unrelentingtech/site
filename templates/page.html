@@ -61,6 +61,31 @@
 			{{ content::content(entry=entry) }}
 		</div>
 
+		{% for anc in entry.ancestors -%}
+			{%- if anc == "photos/_index.md" or anc == "notes/_index.md" or anc == "articles/_index.md" -%}
+				{%- set_global showsideways = true -%}
+			{%- endif -%}
+			{%- if anc == "articles/_index.md" -%}
+				{%- set_global nosidewaysbig = true -%}
+			{%- endif -%}
+		{%- endfor -%}
+		{% if showsideways %}
+			<nav class="chungus sidewaysnav{% if not nosidewaysbig %} sidewaysbig{% endif %}">
+				{% if entry.earlier %}
+					<a href="{{ entry.earlier.permalink | safe }}" rel="next">
+						{{ util::icon(icon="arrowl", title="Earlier entry") }}
+						<span>earlier</span>
+					</a>
+				{% endif %}
+				{% if entry.later %}
+					<a href="{{ entry.later.permalink | safe }}" rel="prev">
+						<span>later</span>
+						{{ util::icon(icon="arrowl", title="Later entry", class="flippy") }}
+					</a>
+				{% endif %}
+			</nav>
+		{% endif %}
+
 		<div class="chungus meta">
 			<section>
 				<h1>{{ util::icon(icon="calendar") }} Published</h1>

@@ -144,9 +144,12 @@ h1 + .post-preview {margin-top:1rem}
 	.side-date {writing-mode:sideways-lr;transform:none}
 }
 
+.flippy {transform:scaleX(-1)}
+.sidewaysnav {display:flex;justify-content:space-between}
+.sidewaysnav svg {width:24px;height:24px;vertical-align:-6.9px}
 .chungus {margin:3rem auto;max-width:70ch}
 .chungus.inv {display:flex;flex-direction:column-reverse}
-.my-content + .chungus {margin-top:5rem}
+.my-content + .chungus:not(.sidewaysnav) {margin-top:5rem}
 .chungus.meta {display:grid;grid-template-columns:repeat(auto-fit,minmax(25ch,1fr));gap:3rem 2rem}
 .chungus.meta > section {font-size:.95em}
 .chungus h1 {font-size:.95em;font-weight:500;margin-bottom:.4em;padding-bottom:.4em;border-bottom:4px solid var(--𝒷𝓇𝒹)}
@@ -168,6 +171,15 @@ h1 + .post-preview {margin-top:1rem}
 @media screen and (min-width:110ch) {
 	.full-article .my-content > pre,.full-article .my-content > figure {margin-left:-10ch;margin-right:-10ch}
 	.chungus {max-width:90ch}
+}
+@media screen and (min-width:130ch) {
+	.sidewaysbig {height:0}
+	.sidewaysbig span {display:none}
+	.sidewaysbig svg {width:5ch;height:5ch}
+	.sidewaysbig a {position:fixed;top:calc(50vh - 5ch/2);opacity:.6}
+	.sidewaysbig a:hover {opacity:1}
+	.sidewaysbig a[rel=next] {left:calc(100vw/2 - 90ch/2 - 10ch/2 - 5ch)}
+	.sidewaysbig a[rel=prev] {right:calc(100vw/2 - 90ch/2 - 10ch/2 - 5ch)}
 }
 @media screen and (min-width:1500px) {
 	.gallery {max-width:min(90%,150ch)}
