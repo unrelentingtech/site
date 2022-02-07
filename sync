@@ -100,7 +100,7 @@ resp = Net::HTTP.post_form(HUB,
 )
 STDERR.puts "==> Response: #{resp}"
 
-if changed_urls.length > 10
+if changed_urls.length > 50
   STDERR.puts "=> Skipping WebMentions for mass update"
 else
   STDERR.puts "=> Sending WebMentions via #{TLG}"
